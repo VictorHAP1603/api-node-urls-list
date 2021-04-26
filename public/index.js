@@ -2,6 +2,12 @@ const ul = document.querySelector("ul")
 const input = document.querySelector("input")
 const form = document.querySelector('form')
 
+async function load() {
+   const res = await fetch('http://localhost:5000').then(data => data.json())
+   res.urls.forEach((item) => {
+      addElement(item)
+   })
+}
 
 function addElement({ name, url }) {
     const li = document.createElement('li')
@@ -13,16 +19,22 @@ function addElement({ name, url }) {
     a.target = "_blank"
 
     trash.innerHTML = "x"
-    trash.onclick = () => removeElement(trash)
+    trash.onclick = () => removeElement(trash, a.href, a.innerHTML)
 
     li.append(a)
     li.append(trash)
     ul.append(li)
 }
 
-function removeElement(el) {
+async function removeElement(el, url, name) {
+    console.log(name)
+    let data = url.split('')
+    let urlFormated = data.slice(0, data.length - 1).join('')
+
     if (confirm('Tem certeza que deseja deletar?'))
         el.parentNode.remove()
+        fetch(`http://localhost:5000/?name=${name}&url=${urlFormated}&del=1`)
+       'http://localhost:5000/?name=Google&url=http://google.com&del=1'
 }
 
 form.addEventListener("submit", (event) => {
@@ -42,6 +54,13 @@ form.addEventListener("submit", (event) => {
         return alert("Digite a url da maneira correta")
 
     addElement({ name, url })
-
+  
+    saveDatas(name, url)
     input.value = ""
 })
+
+async function saveDatas(name, url) {
+    fetch(`http://localhost:5000/?name=${name}&url=${url}`)
+}
+
+load()
